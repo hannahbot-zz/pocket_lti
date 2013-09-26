@@ -1,3 +1,3 @@
-require './tool_provider'
+require './pocket_lti'
 
 run Sinatra::Application
