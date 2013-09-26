@@ -100,22 +100,38 @@ get "/config.xml" do
     http://www.imsglobal.org/xsd/imslticm_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticm_v1p0.xsd
     http://www.imsglobal.org/xsd/imslticp_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticp_v1p0.xsd">
     <blti:title>Pocket LTI</blti:title>
-    <blti:description>Pocket LTI Description</blti:description>
-    <blti:icon>#{ request.scheme }://#{ request.host_with_port }/icon.png</blti:icon>
+    <blti:description>Save stuff from Canvas to Pocket</blti:description>
+    <blti:icon>http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</blti:icon>
     <blti:extensions platform="canvas.instructure.com">
-      <lticm:property name="tool_id">pocket_lti</lticm:property>
+      <lticm:property name="tool_id">pocketi_lti</lticm:property>
       <lticm:property name="privacy_level">anonymous</lticm:property>
       <lticm:options name="editor_button">
-        <lticm:property name="url">#{ request.scheme }://#{ request.host_with_port }/lti_launch</lticm:property>
+        <lticm:property name="url">http://getpocket.com</lticm:property>
+        <lticm:property name="icon_url">http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</lticm:property>
+        <lticm:property name="text">Get Pocket</lticm:property>
+        <lticm:property name="selection_width">400</lticm:property>
+        <lticm:property name="selection_height">300</lticm:property>
+        <lticm:property name="enabled">true</lticm:property>
+      </lticm:options>
+      <lticm:options name="resource_selection">
+        <lticm:property name="url"></lticm:property>
+        <lticm:property name="icon_url">http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</lticm:property>
         <lticm:property name="text">Pocket LTI</lticm:property>
-        <lticm:property name="selection_width">450</lticm:property>
-        <lticm:property name="selection_height">350</lticm:property>
+        <lticm:property name="selection_width">400</lticm:property>
+        <lticm:property name="selection_height">300</lticm:property>
+        <lticm:property name="enabled">true</lticm:property>
+      </lticm:options>
+      <lticm:options name="course_navigation">
+        <lticm:property name="url"></lticm:property>
+        <lticm:property name="text">Pocket LTI</lticm:property>
+        <lticm:property name="visibility">public</lticm:property>
+        <lticm:property name="default">enabled</lticm:property>
         <lticm:property name="enabled">true</lticm:property>
       </lticm:options>
     </blti:extensions>
     <cartridge_bundle identifierref="BLTI001_Bundle"/>
     <cartridge_icon identifierref="BLTI001_Icon"/>
-</cartridge_basiclti_link>  
+</cartridge_basiclti_link>
   EOF
 end
 
