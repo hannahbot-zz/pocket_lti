@@ -56,7 +56,11 @@ class PocketLti < Sinatra::Base
 
     puts "Got Access Token: #{pocket_access_token}"
 
-    redirect '/'
+    #redirect '/'
+    pocket_uri = URI.parse(POCKET_URL)
+    erb :test, :locals => { :url => "#{pocket_uri.path}#{path}",
+                            :access_token => pocket_access_token,
+                           :consumer_key => CONSUMER_KEY }
   end
 
   # Handle POST requests to the endpoint "/lti_launch"
@@ -156,6 +160,8 @@ class PocketLti < Sinatra::Base
 
     # Parse response body as json and return the hash.
     JSON.parse(response.body)
+
+    #erb :test
   end
 
   def pocket_code
@@ -168,5 +174,15 @@ class PocketLti < Sinatra::Base
 
   def pocket_username
     session[:pocket_username]
+  end
+
+  def getPocket
+    url = URI.parse('#{pocket_uri.path}#{path}')
+    req = Net::HTTP::Post.new(url.path)
+
+    req.set_form_data({'access_token' => pocket_access_token,
+                      'consumer_key' => CONSUMER_KEY,
+                      'url' => 'https://hannahbanana.instructure.com/courses/8896/wiki/bacon-ipsum'})
+    res = Net::HTTP.new(url.host, url.port)
   end
 end
