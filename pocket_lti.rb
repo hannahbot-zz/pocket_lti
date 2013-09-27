@@ -20,9 +20,7 @@ class PocketLti < Sinatra::Base
   set :protection, except: :frame_options
 
   get '/' do
-    return pocket_request(POCKET_RETRIEVE_URL, count: 5).to_json
-
-    "<a href='/oauth/launch'>Click Here to login to Pocket.</a>"
+    erb :test
   end
 
   get '/logout' do
@@ -56,11 +54,7 @@ class PocketLti < Sinatra::Base
 
     puts "Got Access Token: #{pocket_access_token}"
 
-    #redirect '/'
-    pocket_uri = URI.parse(POCKET_URL)
-    erb :test, :locals => { :url => "#{pocket_uri.path}#{path}",
-                            :access_token => pocket_access_token,
-                           :consumer_key => CONSUMER_KEY }
+    redirect '/'
   end
 
   # Handle POST requests to the endpoint "/lti_launch"
@@ -116,6 +110,16 @@ class PocketLti < Sinatra::Base
           <cartridge_icon identifierref="BLTI001_Icon"/>
       </cartridge_basiclti_link>
     EOF
+  end
+
+  #add to Pocket
+  post '/add' do
+    pocket_request('/add', url: params['url'], tags: params['tags']).to_json
+  end
+
+  #get from Pocket
+  post '/get' do
+    pocket_request('/get', detailType: params['detailType']).to_json
   end
 
   private
@@ -176,13 +180,4 @@ class PocketLti < Sinatra::Base
     session[:pocket_username]
   end
 
-  def getPocket
-    url = URI.parse('#{pocket_uri.path}#{path}')
-    req = Net::HTTP::Post.new(url.path)
-
-    req.set_form_data({'access_token' => pocket_access_token,
-                      'consumer_key' => CONSUMER_KEY,
-                      'url' => 'https://hannahbanana.instructure.com/courses/8896/wiki/bacon-ipsum'})
-    res = Net::HTTP.new(url.host, url.port)
-  end
 end
