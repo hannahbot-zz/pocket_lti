@@ -1,3 +1,3 @@
-require './tool_provider'
+require File.expand_path('../config/environment', __FILE__)
 
-run Sinatra::Application
+run PocketLti
