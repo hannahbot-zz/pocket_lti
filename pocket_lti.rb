@@ -86,6 +86,25 @@ get "/lti_launch" do
 #pocket stuff
 end
 
+#API calls to Pocket
+
+# Add to Pocket
+request = Net::HTTP::Post.new("https://getpocket.com/v3/add")
+request["Authorization"] = "Bearer #{session[:access_token]}"
+response = http.request(request)
+if response.code == 401
+  halt erb fail_alert("Could not add to Pocket")
+end
+
+# Get from Pocket
+request = Net::HTTP::Post.new("https://getpocket.com/v3/get")
+request["Authorization"] = "Bearer #{session[:access_token]}"
+response = http.request(request)
+if response.code == 401
+  halt erb fail_alert("Could not fetch list from Pocket")
+end
+
+#XML CONFIG
 get "/config.xml" do
   headers 'Content-Type' => 'text/xml'
   <<-EOF
