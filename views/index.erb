@@ -1,6 +1,47 @@
-<html>
-<body>
-<p>You should do an lti tool launch at /lti_tool</p>
-<p>You can get the configuration XML here: <a href="/tool_config.xml">LTI Config</a></p>
-</body>
-</html>
+<!-- pseudocode:
+ 1) link in jquery
+ 2) set up ajax request
+ 3) send request
+ -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+
+<script type="text/javascript">
+    function testing_success(data){
+        alert(data);
+    }
+
+    $(function() {
+        $("a.add").click(function(){
+            var data = {
+                'url': "https://hannahbanana.instructure.com/courses/8896/wiki/bacon-ipsum",
+                'tags': 'canvas'
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: '/add',
+                data: data,
+                success: testing_success
+            });
+        });
+
+        $("a.get").click(function(){
+            var data = {
+                'detailType': 'complete'
+            };
+
+
+            $.ajax({
+                type: "POST",
+                url: '/get',
+                data: data,
+                success: testing_success
+            });
+        });
+    });
+</script>
+
+<a href='#' class='add'> add to pocket? </a>
+<br>
+<a href='#' class='get'> get from pocket? </a>

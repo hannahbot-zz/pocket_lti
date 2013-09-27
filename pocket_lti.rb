@@ -23,7 +23,7 @@ class PocketLti < Sinatra::Base
 
   get '/' do
     return erb :login unless pocket_access_token
-    erb :test
+    erb :index
   end
 
   get '/logout' do
@@ -55,7 +55,7 @@ class PocketLti < Sinatra::Base
   post "/lti_launch" do
     return erb :login unless pocket_access_token
 
-    erb :test
+    erb :index
   end
 
   #XML CONFIG
@@ -110,12 +110,12 @@ class PocketLti < Sinatra::Base
 
   #add to Pocket
   post '/add' do
-    pocket_request('/add', url: params['url'], tags: params['tags']).to_json
+    pocket_request(POCKET_ADD_URL, url: params['url'], tags: params['tags']).to_json
   end
 
   #get from Pocket
   post '/get' do
-    pocket_request('/get', detailType: params['detailType']).to_json
+    pocket_request(POCKET_RETRIEVE_URL, detailType: params['detailType']).to_json
   end
 
   private
