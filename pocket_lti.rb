@@ -4,25 +4,24 @@ require 'net/http'
 require 'net/https'
 
 class PocketLti < Sinatra::Base
-  POCKET_URL               = 'https://getpocket.com/v3'
-  POCKET_REQUEST_URL       = '/oauth/request'
-  POCKET_AUTHORIZE_URL     = '/oauth/authorize'
-  POCKET_RETRIEVE_URL      = '/get'
-  CONSUMER_KEY             = '18846-f8d8e6d9af4a26e611f5a834'
-  REDIRECT_URI             = 'http://localhost:3000/oauth/response'
-  LTI_LAUNCH_URL           = 'http://localhost:3000/lti_launch'
+  require './config/config' if File.exists?('./config/config.rb')
+
+  POCKET_REQUEST_URL       = '/v3/oauth/request'
+  POCKET_AUTHORIZE_URL     = '/v3/oauth/authorize'
+  POCKET_RETRIEVE_URL      = '/v3/get'
+  POCKET_ADD_URL           = '/v3/add'
+  POCKET_MODIFY_URL        = '/v3/send'
+  REDIRECT_URI             = '/oauth/response'
+  LTI_LAUNCH_URL           = '/lti_launch'
 
   # Use sessions to store user data
   enable :sessions
-  set :session_secret, 'super secret session key'
+  set :session_secret, ENV['SESSION_KEY']
 
   # Allow the app to be embedded in an iframe
   set :protection, except: :frame_options
 
   get '/' do
-    return pocket_request(POCKET_RETRIEVE_URL, count: 5).to_json
-
-    "<a href='/oauth/launch'>Click Here to login to Pocket.</a>"
   end
 
   get '/logout' do
@@ -31,22 +30,15 @@ class PocketLti < Sinatra::Base
   end
 
   get '/oauth/launch' do
-    if pocket_access_token
-      redirect '/'
-      return
-    end
+    redirect_url = "#{request.base_url}#{REDIRECT_URI}"
 
-    pocket_response = pocket_request(POCKET_REQUEST_URL, redirect_uri: REDIRECT_URI)
+    pocket_response = pocket_request(POCKET_REQUEST_URL, redirect_uri: redirect_url)
     session[:pocket_code] = pocket_response['code']
 
-    puts "Got Code: #{pocket_code}"
-
-    redirect "https://getpocket.com/auth/authorize?request_token=#{pocket_code}&redirect_uri=#{REDIRECT_URI}"
+    redirect "#{ENV['POCKET_URL']}/auth/authorize?request_token=#{pocket_code}&redirect_uri=#{redirect_url}"
   end
 
   get '/oauth/response' do
-    puts "Get Code: #{session[:pocket_code]}"
-
     raise "Could not find Pocket Code" unless pocket_code
 
     pocket_response = pocket_request(POCKET_AUTHORIZE_URL, code: pocket_code)
@@ -54,13 +46,7 @@ class PocketLti < Sinatra::Base
     session[:pocket_access_token] = pocket_response['access_token']
     session[:pocket_username]     = pocket_response['username']
 
-    puts "Got Access Token: #{pocket_access_token}"
-
-    #redirect '/'
-    pocket_uri = URI.parse(POCKET_URL)
-    erb :test, :locals => { :url => "#{pocket_uri.path}#{path}",
-                            :access_token => pocket_access_token,
-                           :consumer_key => CONSUMER_KEY }
+    redirect '/'
   end
 
   # Handle POST requests to the endpoint "/lti_launch"
@@ -122,7 +108,7 @@ class PocketLti < Sinatra::Base
 
   def pocket_request(path, body_hash = {})
     # Parse URI
-    pocket_uri = URI.parse(POCKET_URL)
+    pocket_uri = URI.parse(ENV['POCKET_URL'])
 
     # Create https object
     https = Net::HTTP.new(pocket_uri.host, pocket_uri.port)
@@ -134,9 +120,9 @@ class PocketLti < Sinatra::Base
     request = Net::HTTP::Post.new("#{pocket_uri.path}#{path}")
 
     # Add consumer key to json submit data
-    body_hash.merge!(consumer_key: CONSUMER_KEY)
+    body_hash.merge!(consumer_key: ENV['POCKET_KEY'])
 
-    # # Add access token if we already have it
+    # Add access token if we already have it
     body_hash[:access_token] = pocket_access_token if pocket_access_token
 
     # Set request body
@@ -146,22 +132,16 @@ class PocketLti < Sinatra::Base
     request['Content-Type'] = 'application/json; charset=UTF-8'
     request['X-Accept'] = 'application/json'
 
-    puts "Request: #{path} >> #{request.body}"
-
     # Get Response from pocket
     response = https.request(request)
 
     # Throw an error if something was wrong with the request.
-    # if response.code != 200
+    # unless response.code == 200
     #   halt erb fail_alert("Could not fetch list from Pocket.  There was an error.  #{response.code}")
     # end
 
-    puts "Response: #{path} >> #{response.body}"
-
     # Parse response body as json and return the hash.
     JSON.parse(response.body)
-
-    #erb :test
   end
 
   def pocket_code
@@ -174,15 +154,5 @@ class PocketLti < Sinatra::Base
 
   def pocket_username
     session[:pocket_username]
-  end
-
-  def getPocket
-    url = URI.parse('#{pocket_uri.path}#{path}')
-    req = Net::HTTP::Post.new(url.path)
-
-    req.set_form_data({'access_token' => pocket_access_token,
-                      'consumer_key' => CONSUMER_KEY,
-                      'url' => 'https://hannahbanana.instructure.com/courses/8896/wiki/bacon-ipsum'})
-    res = Net::HTTP.new(url.host, url.port)
   end
 end

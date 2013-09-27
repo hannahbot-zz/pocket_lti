@@ -1,0 +1,3 @@
+ENV['SESSION_KEY'] ||= 'super secret session key'
+ENV['POCKET_KEY'] ||= '<pocket consumer key>'
+ENV['POCKET_URL'] ||= 'https://getpocket.com'
