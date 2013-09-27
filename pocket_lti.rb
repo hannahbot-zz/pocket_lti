@@ -48,7 +48,7 @@ class PocketLti < Sinatra::Base
     session[:pocket_access_token] = pocket_response['access_token']
     session[:pocket_username]     = pocket_response['username']
 
-    erb :loggedin
+    erb :redirect
   end
 
   # Handle POST requests to the endpoint "/lti_launch"
