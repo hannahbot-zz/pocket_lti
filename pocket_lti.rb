@@ -23,6 +23,7 @@ class PocketLti < Sinatra::Base
 
   get '/' do
     return erb :login unless pocket_access_token
+    @results = pocket_get(count: 5)
     erb :index
   end
 
@@ -54,6 +55,7 @@ class PocketLti < Sinatra::Base
   # Handle POST requests to the endpoint "/lti_launch"
   post "/lti_launch" do
     return erb :login unless pocket_access_token
+    @results = pocket_get(count: 5)
     erb :index
   end
 
@@ -118,6 +120,10 @@ class PocketLti < Sinatra::Base
   end
 
   private
+
+  def pocket_get(params = {})
+    pocket_request(POCKET_RETRIEVE_URL, params)
+  end
 
   def pocket_request(path, body_hash = {})
     # Parse URI
