@@ -2,8 +2,12 @@ require 'sinatra'
 require 'json'
 require 'net/http'
 require 'net/https'
+require 'uri'
+require "erb"
 
 class PocketLti < Sinatra::Base
+  include ERB::Util
+
   require './config/config' if File.exists?('./config/config.rb')
 
   POCKET_REQUEST_URL       = '/v3/oauth/request'
@@ -54,6 +58,7 @@ class PocketLti < Sinatra::Base
 
   # Handle POST requests to the endpoint "/lti_launch"
   post "/lti_launch" do
+    session[:launch_presentation_return_url] = params[:launch_presentation_return_url]
     return erb :login unless pocket_access_token
     @results = pocket_get(count: 5)
     erb :index
@@ -122,7 +127,18 @@ class PocketLti < Sinatra::Base
   private
 
   def pocket_get(params = {})
-    pocket_request(POCKET_RETRIEVE_URL, params)
+    returnData = []
+
+    results = pocket_request(POCKET_RETRIEVE_URL, params)
+    results['list'].each do |l|
+      returnData << {
+        :title => l[1]['resolved_title'],
+        :url => l[1]['resolved_url'],
+        :return_url => "#{launch_presentation_return_url}?return_type=url&url=#{url_encode(l[1]['resolved_url'])}&title=#{url_encode(l[1]['resolved_title'])}"
+      }
+    end
+
+    returnData
   end
 
   def pocket_request(path, body_hash = {})
@@ -173,5 +189,9 @@ class PocketLti < Sinatra::Base
 
   def pocket_username
     session[:pocket_username]
+  end
+
+  def launch_presentation_return_url
+    session[:launch_presentation_return_url]
   end
 end

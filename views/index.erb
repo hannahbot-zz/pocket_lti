@@ -16,8 +16,13 @@
   <div class="container">
     <div class="row">
       <ul class="col-md-12">
-        <% @results['list'].each do |l| %>
-          <li><%= l[1]['given_title'].to_json %></li>
+        <% @results.each do |l| %>
+          <li>
+            <h5><%= l[:title] %></h5>
+            <a href="<%= l[:return_url] %>">
+              <%= l[:url] %>
+            </a>
+          </li>
         <% end %>
       </ul>
     </div>
