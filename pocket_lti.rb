@@ -22,6 +22,8 @@ class PocketLti < Sinatra::Base
   set :protection, except: :frame_options
 
   get '/' do
+    return erb :login unless pocket_access_token
+    erb :test
   end
 
   get '/logout' do
@@ -51,7 +53,9 @@ class PocketLti < Sinatra::Base
 
   # Handle POST requests to the endpoint "/lti_launch"
   post "/lti_launch" do
-    "<a href='/oauth/launch'>Click Here to login to Pocket.</a>"
+    return erb :login unless pocket_access_token
+
+    erb :test
   end
 
   #XML CONFIG
@@ -102,6 +106,16 @@ class PocketLti < Sinatra::Base
           <cartridge_icon identifierref="BLTI001_Icon"/>
       </cartridge_basiclti_link>
     EOF
+  end
+
+  #add to Pocket
+  post '/add' do
+    pocket_request('/add', url: params['url'], tags: params['tags']).to_json
+  end
+
+  #get from Pocket
+  post '/get' do
+    pocket_request('/get', detailType: params['detailType']).to_json
   end
 
   private
