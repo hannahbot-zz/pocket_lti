@@ -10,10 +10,14 @@ class PocketLti < Sinatra::Base
   POCKET_RETRIEVE_URL      = '/get'
   CONSUMER_KEY             = '18859-ea35af14bd5e6fb981c6f8e7'
   REDIRECT_URI             = 'http://localhost:3000/oauth/response'
+  LTI_LAUNCH_URL           = 'http://localhost:3000/lti_launch'
 
   # Use sessions to store user data
   enable :sessions
   set :session_secret, 'super secret session key'
+
+  # Allow the app to be embedded in an iframe
+  set :protection, except: :frame_options
 
   get '/' do
     if pocket_access_token
@@ -58,6 +62,61 @@ class PocketLti < Sinatra::Base
     redirect '/'
   end
 
+  # Handle POST requests to the endpoint "/lti_launch"
+  post "/lti_launch" do
+    redirect '/' if pocket_access_token
+  end
+
+  #XML CONFIG
+  get "/config.xml" do
+    headers 'Content-Type' => 'text/xml'
+    <<-EOF
+      <?xml version="1.0" encoding="UTF-8"?>
+      <cartridge_basiclti_link xmlns="http://www.imsglobal.org/xsd/imslticc_v1p0"
+          xmlns:blti = "http://www.imsglobal.org/xsd/imsbasiclti_v1p0"
+          xmlns:lticm ="http://www.imsglobal.org/xsd/imslticm_v1p0"
+          xmlns:lticp ="http://www.imsglobal.org/xsd/imslticp_v1p0"
+          xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation = "http://www.imsglobal.org/xsd/imslticc_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticc_v1p0.xsd
+          http://www.imsglobal.org/xsd/imsbasiclti_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imsbasiclti_v1p0.xsd
+          http://www.imsglobal.org/xsd/imslticm_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticm_v1p0.xsd
+          http://www.imsglobal.org/xsd/imslticp_v1p0 http://www.imsglobal.org/xsd/lti/ltiv1p0/imslticp_v1p0.xsd">
+          <blti:title>Pocket LTI</blti:title>
+          <blti:description>Save stuff from Canvas to Pocket</blti:description>
+          <blti:icon>http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</blti:icon>
+          <blti:extensions platform="canvas.instructure.com">
+            <lticm:property name="tool_id">pocketi_lti</lticm:property>
+            <lticm:property name="privacy_level">anonymous</lticm:property>
+            <lticm:options name="editor_button">
+              <lticm:property name="url">#{LTI_LAUNCH_URL}</lticm:property>
+              <lticm:property name="icon_url">http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</lticm:property>
+              <lticm:property name="text">Get Pocket</lticm:property>
+              <lticm:property name="selection_width">400</lticm:property>
+              <lticm:property name="selection_height">300</lticm:property>
+              <lticm:property name="enabled">true</lticm:property>
+            </lticm:options>
+            <lticm:options name="resource_selection">
+              <lticm:property name="url"></lticm:property>
+              <lticm:property name="icon_url">http://3doordigital.com/wp-content/uploads/Pocket-icon-e1358620226390.png</lticm:property>
+              <lticm:property name="text">Pocket LTI</lticm:property>
+              <lticm:property name="selection_width">400</lticm:property>
+              <lticm:property name="selection_height">300</lticm:property>
+              <lticm:property name="enabled">true</lticm:property>
+            </lticm:options>
+            <lticm:options name="course_navigation">
+              <lticm:property name="url"></lticm:property>
+              <lticm:property name="text">Pocket LTI</lticm:property>
+              <lticm:property name="visibility">public</lticm:property>
+              <lticm:property name="default">enabled</lticm:property>
+              <lticm:property name="enabled">true</lticm:property>
+            </lticm:options>
+          </blti:extensions>
+          <cartridge_bundle identifierref="BLTI001_Bundle"/>
+          <cartridge_icon identifierref="BLTI001_Icon"/>
+      </cartridge_basiclti_link>
+    EOF
+  end
+
   private
 
   def pocket_request(path, body_hash = {})
@@ -90,6 +149,11 @@ class PocketLti < Sinatra::Base
 
     # Get Response from pocket
     response = https.request(request)
+
+    # Throw an error if something was wrong with the request.
+    if response.code != 200
+      halt erb fail_alert("Could not fetch list from Pocket.  There was an error.  #{response.code}")
+    end
 
     puts "Response: #{path} >> #{response.body}"
 
