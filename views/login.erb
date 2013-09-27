@@ -1,1 +1,46 @@
-<a href='/oauth/launch'>Click Here to login to Pocket.</a>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title></title>
+
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css"> -->
+</head>
+<body>
+  <div class="container">
+    <div class="row login">
+      <div class="col-md-12">
+        <p>
+          <div class="thumbnail">
+            <img src="http://getpocket.com/i/v3/pocket_logo.png" alt="Login to Pocket">
+          </div>
+        </p>
+        <p>
+          <a href="/oauth/launch" class="btn btn-danger btn-block">Login</a>
+        </p>
+      </div>
+    </div>
+    <div class="row loading hide">
+      <p>Logging In...</p>
+    </div>
+  </div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <script>
+    $(function() {
+        $(".btn").click(function(e){
+          var target = $(e.target);
+
+          $(".container .login").slideUp();
+          $(".container .loading").removeClass("hide").slideDown();
+
+          window.open(e.target, 'width=400,height=200,location=0,menubar=0,resizable=0,scrollbars=0,status=0,titlebar=0,toolbar=0');
+        });
+    });
+  </script>
