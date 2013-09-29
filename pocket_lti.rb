@@ -98,7 +98,7 @@ class PocketLti < Sinatra::Base
               <lticm:property name="text">Pocket LTI</lticm:property>
               <lticm:property name="selection_width">400</lticm:property>
               <lticm:property name="selection_height">300</lticm:property>
-              <lticm:property name="enabled">true</lticm:property>
+              <lticm:property name="enabled">false</lticm:property>
             </lticm:options>
             <lticm:options name="course_navigation">
               <lticm:property name="url">http://localhost:3000/lti_launch</lticm:property>

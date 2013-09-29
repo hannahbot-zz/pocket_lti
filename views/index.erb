@@ -13,20 +13,23 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="row">
-      <ul class="col-md-12">
-        <% @results.each do |l| %>
-          <li>
-            <h5><%= l[:title] %></h5>
-            <a href="<%= l[:return_url] %>">
-              <%= l[:url] %>
-            </a>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+<div class="panel panel-primary">
+  <!-- Default panel contents -->
+  <div class="panel-heading">Pocket Items</div>
+  <div class="panel-body">
+    <p>A list of the 5 most recent items from your Pocket. Click on the title to embed it into the Rich Content Editor.</p>
   </div>
+
+  <!-- List group -->
+  <ul class="list-group">
+    <% @results.each do |l| %>
+        <a href="<%= l[:return_url] %>" class="list-group-item">
+          <%= l[:title] %>
+        </a>
+    <% end %>
+  </ul>
+ </div>
+</body>
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
